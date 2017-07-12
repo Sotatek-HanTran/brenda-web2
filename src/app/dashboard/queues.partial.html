@@ -1,0 +1,50 @@
+<!-- 
+	Brenda-Web -- Frontend for Blender
+	Copyright (C) 2016 Nakul Jeirath
+	
+	Brenda-Web is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+-->
+<div class="panel panel-default">
+	<div class="panel-heading">
+    	<h3 class="panel-title">Queues</h3>
+	</div>
+	<div class="panel-body">
+		<div class="table-responsive">
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Queue</th>
+						<th>Tasks</th>
+						<th>Active Workers</th>
+						<th>Combined Time/Task</th>
+						<th>Estimated Time Left</th>
+						<th>Cost/Hr</th>
+						<th>Estimated Cost Left</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="queue in queues.queues">
+						<td>{{queue.url | queueToName}}</td>
+						<td>{{queue.size}}</td>
+						<td>{{workerCount(queue.url)}}</td>
+						<td>{{timePerFrame(queue.url) | secondsToDateTime}}</td>
+						<td>{{queue.size * timePerFrame(queue.url) | secondsToDateTime}}</td>
+						<td>{{totalCost(queue.url) | currency}}</td>
+						<td>{{queue.size * timePerFrame(queue.url) / 3600 * totalCost(queue.url) | currency}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

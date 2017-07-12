@@ -1,0 +1,32 @@
+<!-- 
+	Brenda-Web -- Frontend for Blender
+	Copyright (C) 2016 Nakul Jeirath
+	
+	Brenda-Web is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+-->
+<p class="lead">
+	The destination bucket is where the workers will place the completed frames.
+</p>
+
+<ol>
+	<li>Log in to AWS and click on <strong>S3</strong></li>
+	<li>If a destination bucket does not already exist, click the <strong>Create Bucket</strong> button and follow the prompts to create one</li>
+	<li>
+		Once the bucket is created, populate the "Frame Destination Bucket" field with the bucket in the format:
+		<br>
+		<code>s3://BUCKET_NAME</code>
+		<br>
+		Where BUCKET_NAME is the name of the destination bucket
+		</li>
+</ol>

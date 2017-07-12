@@ -1,0 +1,41 @@
+<!-- 
+	Brenda-Web -- Frontend for Blender
+	Copyright (C) 2016 Nakul Jeirath
+	
+	Brenda-Web is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+-->
+<div class="row">
+	<div class="col-sm-3 col-md-2 sidebar">
+		<ul class="nav nav-sidebar">
+			<li du-scrollspy="credentials"><a du-smooth-scroll="credentials">AWS Credentials</a></li>
+			<li du-scrollspy="queue"><a du-smooth-scroll="queue">Work Queue <span class="badge">{{queue.queueSize}}</span></a></li>
+			<li du-scrollspy="s3"><a du-smooth-scroll="s3">S3 Locations</a></li>
+			<li du-scrollspy="workers"><a du-smooth-scroll="workers">Workers</a></li>
+		</ul>
+	</div>
+	<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+		<section id="credentials">
+			<div ui-view="credentials"></div>
+		</section>
+		<section id="queue">
+			<div ui-view="queue"></div>
+		</section>
+		<section id="s3">
+			<div ui-view="s3"></div>
+		</section>
+		<section id="workers">
+			<div ui-view="workers"></div>
+		</section>
+	</div>
+</div>

@@ -1,0 +1,76 @@
+<!-- 
+	Brenda-Web -- Frontend for Blender
+	Copyright (C) 2016 Nakul Jeirath
+	
+	Brenda-Web is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+-->
+<div class="modal-header">
+    <h3 class="modal-title">AMI</h3>
+</div>
+<div class="modal-body">
+	<div class="panel panel-default">
+		<div class="panel-heading clearfix">
+			<h3 class="panel-title pull-left">AWS Credentials</h3>
+			<div class="pull-right"><a href brenda-help="awsSetup/help/awsSetupHelp.html"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></a></div>
+		</div>
+		<div class="panel-body">
+			<form name="awsConfigure">
+				<div class="form-group" ng-class="{ 'has-error': (awsConfigure.awsKeyId.$touched || awsConfigure.$submitted) && awsConfigure.awsKeyId.$invalid}">
+					<label for="awsKeyId">AWS Access Key ID</label>
+					<input type="text" name="awsKeyId" class="form-control" id="awsKeyId" ng-model="credentials.awsKeyId" placeholder="Key ID" required>
+					<div ng-messages="awsConfigure.awsKeyId.$error" ng-show="awsConfigure.awsKeyId.$touched || awsConfigure.$submitted" role="alert">
+						<div ng-message="required">Field is required</div>
+					</div>
+				</div>
+				<div class="form-group"  ng-class="{ 'has-error': (awsConfigure.awsSecret.$touched || awsConfigure.$submitted) && awsConfigure.awsSecret.$invalid}">
+					<label for="awsSecret">AWS Access Key Secret</label>
+					<input type="text" name="awsSecret" class="form-control" id="awsSecret" ng-model="credentials.awsSecret" placeholder="Key Secret" required />
+					<div ng-messages="awsConfigure.awsSecret.$error"  ng-show="awsConfigure.awsSecret.$touched || awsConfigure.$submitted" role="alert">
+						<div ng-message="required">Field is required</div>
+					</div>
+				</div>
+				<div class="form-group"  ng-class="{ 'has-error': (awsConfigure.awsRegion.$touched || awsConfigure.$submitted) && awsConfigure.awsRegion.$invalid}">
+					<label for="awsRegion">AWS Region</label>
+					<input type="text" name="awsRegion" class="form-control" id="awsRegion" ng-model="credentials.awsRegion" placeholder="Region" required/>
+					<div ng-messages="awsConfigure.awsRegion.$error"  ng-show="awsConfigure.awsRegion.$touched || awsConfigure.$submitted" role="alert">
+						<div ng-message="required">Field is required</div>
+					</div>
+				</div>
+				<div class="form-inline">
+					<button type="submit" ng-click="setCredentials(awsConfigure)" id="setCredentialsBtn" class="btn btn-primary">Set Credentials</button>
+					<button type="submit" ng-click="clearStorage()" id="clearStorageBtn" class="btn btn-default">Clear</button>
+					<div class="checkbox">
+					    <label>
+				      		<input type="checkbox" ng-model="storeCredentials"> Remember me (<strong>Don't check this if you're on a public computer</strong>)
+					    </label>
+				  	</div>
+				</div>
+				<ul class="list-group">
+					<li class="list-group-item list-group-item-{{credentialCheck.status}}" id="loginStatus">
+						{{credentialCheck.msg}}
+					</li>
+					<li class="list-group-item list-group-item-{{securityGroupCheck.status}}">{{securityGroupCheck.msg}} 
+						<a href ng-click="createSG()" ng-show="securityGroupCheck.status == 'danger'"><strong>Fix it</strong></a></li>
+				</ul>
+				<div class="alert alert-info" role="alert">
+					<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+					If updating or clearing credentials, refresh the page after making changes due to AWS libraries caching credentials
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" ng-click="ok()">Done</button>
+</div>

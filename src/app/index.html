@@ -1,0 +1,123 @@
+<!--
+	Brenda-Web -- Frontend for Blender
+	Copyright (C) 2016 Nakul Jeirath
+
+	Brenda-Web is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html lang="en" ng-app="brendaWeb" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html lang="en" ng-app="brendaWeb" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html lang="en" ng-app="brendaWeb" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en" ng-app="brendaWeb" class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Brenda Web Utility</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/normalize.css">
+  <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/main.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="bower_components/angular-bootstrap-lightbox/dist/angular-bootstrap-lightbox.min.css" >
+  <script src="bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top" ng-controller="NavCtrl">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" ng-click="navbarCollapsed = !navbarCollapsed" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#" ng-click="navbarCollapsed = true">Brenda-Web</a>
+        </div>
+        <div class="collapse navbar-collapse" uib-collapse="navbarCollapsed">
+          <ul class="nav navbar-nav">
+          	<li><a href aws-configure id="awsConfigureButton" ng-click="navbarCollapsed = true"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> AWS Config</a></li>
+            <li><a ui-sref="setup.view" ng-click="navbarCollapsed = true"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Setup Job</a></li>
+            <li><a ui-sref="dashboard.view" ng-click="navbarCollapsed = true"><span class="glyphicon glyphicon-scale" aria-hidden="true"></span> Dashboard</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+          	<li><a ui-sref="tutorial" ng-click="navbarCollapsed = true"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Tutorial</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+	<div class="container-fluid">
+		<ui-view></ui-view>
+	</div>
+
+
+ 	<div class="footer navbar-fixed-bottom">
+  		<div class="container">
+        	<p class="text-muted text-right">Copyright (C) 2016 Nakul Jeirath</p>
+  		</div>
+    </div>
+
+  <!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+  <![endif]-->
+
+  <!-- In production use:
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
+  -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  </script>
+
+  <script src="bower_components/angular/angular.js"></script>
+  <script src="bower_components/angular-messages/angular-messages.js"></script>
+  <script src="ui-bootstrap-tpls-1.1.2.min.js"></script>
+  <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.2.37.min.js"></script>
+  <script src="bower_components/angular-local-storage/dist/angular-local-storage.min.js"></script>
+  <script src="bower_components/angular-scroll/angular-scroll.min.js"></script>
+  <script src="bower_components/angulartics/dist/angulartics.min.js"></script>
+  <script src="bower_components/angulartics-google-analytics/dist/angulartics-google-analytics.min.js"></script>
+  <script src="bower_components/angular-bootstrap-lightbox/dist/angular-bootstrap-lightbox.js"></script>
+  <script src="awsSetup/awsSetup.module.js"></script>
+  <script src="awsSetup/awsSetup.run.js"></script>
+  <script src="awsSetup/awsService.service.js"></script>
+  <script src="awsSetup/awsSetup.ctrl.js"></script>
+  <script src="awsSetup/createQueue.ctrl.js"></script>
+  <script src="awsSetup/awsConfigure.directive.js"></script>
+  <script src="awsSetup/awsConfigure.ctrl.js"></script>
+  <script src="awsSetup/jobSetup.ctrl.js"></script>
+  <script src="awsSetup/s3.ctrl.js"></script>
+  <script src="awsSetup/workerSetup.ctrl.js"></script>
+  <script src="awsSetup/setup.ctrl.js"></script>
+  <script src="awsSetup/aws.service.js"></script>
+  <script src="awsSetup/queueToName.filter.js"></script>
+  <script src="dashboard/dashboard.js"></script>
+  <script src="dashboard/bucket.ctrl.js"></script>
+  <script src="dashboard/instances.ctrl.js"></script>
+  <script src="dashboard/timeFilter.js"></script>
+  <script src="dashboard/dashboardParent.ctrl.js"></script>
+  <script src="dashboard/queues.ctrl.js"></script>
+  <script src="dashboard/terminateConfirm.ctrl.js"></script>
+  <script src="brenda-help/brendaHelp.js"></script>
+  <script src="app.js"></script>
+  <script src="start/start.js"></script>
+  <script src="components/version/version.js"></script>
+  <script src="components/version/version-directive.js"></script>
+  <script src="components/version/interpolate-filter.js"></script>
+</body>
+</html>

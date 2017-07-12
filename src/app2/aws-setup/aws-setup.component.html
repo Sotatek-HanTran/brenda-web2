@@ -1,0 +1,15 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">AWS Credentials</h3>
+  </div>
+  <div class="panel-body">
+    <table class="table">
+      <tr><td><strong>Access Key ID:</strong></td><td>{{awsKeyId}}</td></tr>
+      <tr><td><strong>AWS Access Key Secret:</strong></td><td>{{awsSecret}}</td></tr>
+      <tr><td><strong>AWS Region:</strong></td><td>{{awsRegion}}</td></tr>
+    </table>
+    <div *ngIf="showNoCredentialsError()">
+      <div class="alert alert-danger">Credentials not configured yet, <a href aws-configure><strong>configure</strong></a> them now</div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>BrendaWeb2</title>
+  <base href="/">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <link rel="stylesheet" href="app/bower_components/html5-boilerplate/dist/css/normalize.css">
+  <link rel="stylesheet" href="app/bower_components/html5-boilerplate/dist/css/main.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  <link rel="stylesheet" href="app/app.css">
+  <link rel="stylesheet" href="app/bower_components/angular-bootstrap-lightbox/dist/angular-bootstrap-lightbox.min.css" >
+  <script src="app/bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" ng-controller="NavCtrl">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" ng-click="navbarCollapsed = !navbarCollapsed" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" routerLink="/">Brenda-Web</a>
+    </div>
+    <div class="collapse navbar-collapse" uib-collapse="navbarCollapsed">
+      <ul class="nav navbar-nav">
+        <li><a href aws-configure id="awsConfigureButton" ng-click="navbarCollapsed = true"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> AWS Config</a></li>
+        <li><a ui-sref="setup.view" ng-click="navbarCollapsed = true"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Setup Job</a></li>
+        <li><a ui-sref="dashboard.view" ng-click="navbarCollapsed = true"><span class="glyphicon glyphicon-scale" aria-hidden="true"></span> Dashboard</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a ui-sref="tutorial" ng-click="navbarCollapsed = true"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Tutorial</a></li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <ui-view></ui-view>
+  <app2></app2>
+</div>
+
+
+<div class="footer navbar-fixed-bottom">
+  <div class="container">
+    <p class="text-muted text-right">Copyright (C) 2016 Nakul Jeirath</p>
+  </div>
+</div>
+
+
+
+
+
+
+  <script src="app/bower_components/angular/angular.js"></script>
+  <script src="app/bower_components/angular-messages/angular-messages.js"></script>
+  <script src="app/ui-bootstrap-tpls-1.1.2.min.js"></script>
+  <script src="app/bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.2.37.min.js"></script>
+  <script src="app/bower_components/angular-local-storage/dist/angular-local-storage.min.js"></script>
+  <script src="app/bower_components/angular-scroll/angular-scroll.min.js"></script>
+  <script src="app/bower_components/angulartics/dist/angulartics.min.js"></script>
+  <script src="app/bower_components/angulartics-google-analytics/dist/angulartics-google-analytics.min.js"></script>
+  <script src="app/bower_components/angular-bootstrap-lightbox/dist/angular-bootstrap-lightbox.js"></script>
+  <script src="app/awsSetup/awsSetup.module.js"></script>
+  <script src="app/awsSetup/awsSetup.run.js"></script>
+  <script src="app/awsSetup/awsService.service.js"></script>
+  <script src="app/awsSetup/awsSetup.ctrl.js"></script>
+  <script src="app/awsSetup/createQueue.ctrl.js"></script>
+  <script src="app/awsSetup/awsConfigure.directive.js"></script>
+  <script src="app/awsSetup/awsConfigure.ctrl.js"></script>
+  <script src="app/awsSetup/jobSetup.ctrl.js"></script>
+  <script src="app/awsSetup/s3.ctrl.js"></script>
+  <script src="app/awsSetup/workerSetup.ctrl.js"></script>
+  <script src="app/awsSetup/setup.ctrl.js"></script>
+  <script src="app/awsSetup/aws.service.js"></script>
+  <script src="app/awsSetup/queueToName.filter.js"></script>
+  <script src="app/dashboard/dashboard.js"></script>
+  <script src="app/dashboard/bucket.ctrl.js"></script>
+  <script src="app/dashboard/instances.ctrl.js"></script>
+  <script src="app/dashboard/timeFilter.js"></script>
+  <script src="app/dashboard/dashboardParent.ctrl.js"></script>
+  <script src="app/dashboard/queues.ctrl.js"></script>
+  <script src="app/dashboard/terminateConfirm.ctrl.js"></script>
+  <script src="app/brenda-help/brendaHelp.js"></script>
+  <script src="app/app.js"></script>
+  <script src="app/start/start.js"></script>
+  <script src="app/components/version/version.js"></script>
+  <script src="app/components/version/version-directive.js"></script>
+  <script src="app/components/version/interpolate-filter.js"></script>
+
+
+
+</body>
+</html>
