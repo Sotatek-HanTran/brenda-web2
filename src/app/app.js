@@ -29,9 +29,11 @@ angular.module('brendaWeb', [
   'dashboard'
 ]).
 config(['$stateProvider', function($stateProvider) {
-  $stateProvider.state('setup', {
-  	// templateUrl: 'app/jobSetup/jobSetup.partial.html',
-    // controller: 'SetupCtrl'
+  $stateProvider
+    .state('landing', {
+      url: '',
+      template: '<landing-page></landing-page>'
+    }).state('setup', {
     templateUrl: 'app/jobSetup/jobSetup.partial.html',
     controller: 'SetupCtrl'
   }).state('setup.view', {
@@ -56,11 +58,7 @@ config(['$stateProvider', function($stateProvider) {
   .state('tutorial', {
 	  url: '/tutorial',
 	  templateUrl: 'app/tutorial/tutorial.partial.html'
-  })/*
-    .state('landing', {
-      url: '',
-      template: '<!-- AngularJS landing--><p>AngularJS landing</p>'
-    })*/;
+  });
 }])
 .controller('NavCtrl', ['$scope', function($scope) {
 	$scope.navbarCollapsed = true;

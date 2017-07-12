@@ -12,13 +12,13 @@
 //GNU General Public License for more details.
 //
 //You should have received a copy of the GNU General Public License
-//along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+//along with this program.  If not, see <http://www.gnu.org/licenses/>.
 'use strict';
 
 angular.module('awsSetup')
-.factory('awsService', ['$log', '$rootScope', 'localStorageService', 'aws', '$q', '$interval', function($log, $rootScope, localStorageService, aws, $q, $interval) {	
-	var startDate = startDate = new Date(new Date() - 6*60*60*1000);
-	
+.factory('awsService', ['$log', '$rootScope', 'localStorageService', 'aws', '$q', '$interval', function($log, $rootScope, localStorageService, aws, $q, $interval) {
+	var startDate = new Date(new Date() - 6*60*60*1000);
+
 	var deferredWrapper = function(obj, func, params) {
 		var deferred = $q.defer();
 		func.call(obj, params, function(err, data) {
@@ -28,10 +28,10 @@ angular.module('awsSetup')
 				deferred.resolve(data);
 			}
 		});
-		
+
 		return deferred.promise;
 	}
-	
+
 	var service = {
 		setCredentials: function(keyId, secret) {
 			aws.config.update({accessKeyId: keyId, secretAccessKey: secret});
@@ -60,9 +60,9 @@ angular.module('awsSetup')
 		},
 		testCredentials: function() {
 			var ec2 = new aws.EC2();
-			
+
 			var deferred = $q.defer();
-			
+
 			ec2.describeKeyPairs({}, function(err, data) {
 				if (err) {
 					deferred.reject(String(err));
@@ -73,7 +73,7 @@ angular.module('awsSetup')
 					$rootScope.$broadcast('aws-login-success');
 				}
 			});
-			
+
 			return deferred.promise;
 		},
 		getQueues: function() {
@@ -89,7 +89,7 @@ angular.module('awsSetup')
 		sendToQueue: function(queueUrl, data) {
 			localStorageService.set('awsQueue', queueUrl);
 			var sqs = new aws.SQS();
-			
+
 			var sendStatus = {
 				total: data.length,
 				success: 0,
@@ -100,31 +100,31 @@ angular.module('awsSetup')
 						total: this.total,
 						success: this.success,
 						failed: this.failed,
-						inFlight: this.inFlight 
+						inFlight: this.inFlight
 					};
 				}
 			};
-			
+
 			$rootScope.$broadcast('aws-sqs-send-update', sendStatus.copy());
-			
+
 			var entries = [];
-			
+
 			data.forEach(function(item, i) {
 				entries.push( {
 					MessageBody: btoa(item),
 					Id: String(i)
 				});
-				
+
 				if ((entries.length === 10) || ( i === (data.length -1))) {
 					sendStatus.inFlight += entries.length;
 					$rootScope.$broadcast('aws-sqs-send-update', sendStatus.copy());
-					
+
 					(function() {
 						var params = {
 							Entries: entries,
 							QueueUrl: queueUrl
 						};
-						
+
 						sqs.sendMessageBatch(params, function(err, data) {
 							if (err) {
 								sendStatus.failed += params.Entries.length;
@@ -135,12 +135,12 @@ angular.module('awsSetup')
 								sendStatus.inFlight -= data.Successful.length;
 								sendStatus.inFlight -= data.Failed.length;
 							}
-							
+
 							$rootScope.$broadcast('aws-sqs-send-update', sendStatus.copy());
 						});
 					}());
-					
-					
+
+
 					entries = [];
 				}
 			});
@@ -155,12 +155,12 @@ angular.module('awsSetup')
 		getQueueSize: function(queueUrl) {
 			var sqs = new aws.SQS();
 			var params = {
-				QueueUrl: queueUrl, 
+				QueueUrl: queueUrl,
 				AttributeNames: ['ApproximateNumberOfMessages', 'ApproximateNumberOfMessagesNotVisible']
 			};
-			
+
 			var deferred = $q.defer();
-			
+
 			sqs.getQueueAttributes(params, function(err, data) {
 				if (err) {
 					deferred.reject(String(err));
@@ -168,7 +168,7 @@ angular.module('awsSetup')
 					deferred.resolve(data.Attributes.ApproximateNumberOfMessages);
 				}
 			});
-			
+
 			return deferred.promise;
 		},
 		getKeyPairs: function(callback) {
@@ -186,7 +186,7 @@ angular.module('awsSetup')
 			var devs = [
 	            'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p'
             ];
-			
+
 			var spec = {
 				ImageId: ami,
 				KeyName: keyPair,
@@ -194,10 +194,10 @@ angular.module('awsSetup')
 				UserData: btoa(userData),
 				InstanceType: instanceType
 			};
-			
+
 			if (snapshots) {
 				spec.BlockDeviceMappings = [];
-				
+
 				snapshots.forEach(function(snapshot, i) {
 					spec.BlockDeviceMappings.push({
 						DeviceName: '/dev/sd' + devs[i],
@@ -208,7 +208,7 @@ angular.module('awsSetup')
 					});
 				});
 			}
-			
+
 			return spec;
 		},
 		setTags: function(instances, tags, callback) {
@@ -216,7 +216,7 @@ angular.module('awsSetup')
 				Resources: instances,
 				Tags: tags
 			};
-			
+
 			var ec2 = new aws.EC2();
 			ec2.createTags(params, function(err, data) {
 				if (err) {
@@ -233,7 +233,7 @@ angular.module('awsSetup')
 		},
 		requestSpot: function(ami, keyPair, securityGroup, userData, instanceType, snapshots, spotPrice, count, type, queueName, s3Destination, statusCallback) {
 			var spec = this.getLaunchSpecification(ami, keyPair, securityGroup, userData, instanceType, snapshots);
-			
+
 			var params = {
 				// DryRun: true,
 				SpotPrice: String(spotPrice),
@@ -241,9 +241,9 @@ angular.module('awsSetup')
 				LaunchSpecification: spec,
 				Type: type
 			};
-			
+
 			var self = this;
-			
+
 			var ec2 = new aws.EC2();
 			ec2.requestSpotInstances(params, function(err, data) {
 				if (err) {
@@ -261,7 +261,7 @@ angular.module('awsSetup')
 							statusCallback('success', 'Spot instances requested');
 						}
 					});
-					
+
 				}
 			});
 		},
@@ -271,9 +271,9 @@ angular.module('awsSetup')
 			spec.MaxCount = count;
 			spec.InstanceInitiatedShutdownBehavior = 'terminate';
 			// spec.DryRun = true;
-			
+
 			var self = this;
-			
+
 			var ec2 = new aws.EC2();
 			ec2.runInstances(spec, function(err, data) {
 				if (err) {
@@ -300,14 +300,14 @@ angular.module('awsSetup')
 		},
 		getInstanceDetails: function(instanceList) {
 			var ec2 = new aws.EC2();
-			
+
 			var params = {};
 			if (instanceList) {
 				params.InstanceIds = instanceList;
 			} else {
 				params.Filters = [{Name: 'tag-key', Values: ['brenda-queue']}];
 			}
-			
+
 			return deferredWrapper(ec2, ec2.describeInstances, params);
 		},
 		getSecurityGroups: function(groupName) {
@@ -316,14 +316,14 @@ angular.module('awsSetup')
 		},
 		createSecurityGroup: function() {
 			var ec2 = new aws.EC2();
-			
+
 			var deferred = $q.defer();
-			
+
 			var sgParams = {
 				GroupName: 'brenda-web',
 				Description: 'Security group used by brenda-web.com'
 			};
-			
+
 			var ingressParams = {
 				IpPermissions: [{
 					FromPort: 22,
@@ -348,8 +348,8 @@ angular.module('awsSetup')
 					ToPort: -1
 				}]
 			};
-			
-			
+
+
 			ec2.createSecurityGroup(sgParams, function(err, data) {
 				if (err) {
 					deferred.reject(String(err));
@@ -362,10 +362,10 @@ angular.module('awsSetup')
 							deferred.resolve();
 						}
 					});
-					
+
 				}
 			});
-			
+
 			return deferred.promise;
 		},
 		createQueue: function(queueName) {
@@ -375,7 +375,7 @@ angular.module('awsSetup')
 					VisibilityTimeout: '120'
 				}
 			};
-			
+
 			var sqs = new aws.SQS();
 			return deferredWrapper(sqs, sqs.createQueue, params);
 		},
@@ -387,7 +387,7 @@ angular.module('awsSetup')
 		getObjectUri: function(bucket, key) {
 			var cacheKey = bucket + '-' + key;
 			var cached = this.uriCache[cacheKey];
-			
+
 			//If cached and not going to expire within the next two minutes
 			if (cached && (cached.expiration > new Date(new Date().valueOf() + 120*1000))) {
 				return cached.url;
@@ -397,13 +397,13 @@ angular.module('awsSetup')
 				this.uriCache[cacheKey] = {url: url, expiration: new Date(new Date().valueOf() + 3600*1000)}
 				return url;
 			}
-			
-			
+
+
 		},
 		getAvailabilityZones: function() {
 			var deferred = $q.defer();
 			var ec2 = new aws.EC2();
-			
+
 			ec2.describeAvailabilityZones({}, function(err, data) {
 				if(err) {
 					deferred.reject(String(err));
@@ -411,21 +411,21 @@ angular.module('awsSetup')
 					deferred.resolve(data.AvailabilityZones.map(function(item) {return item.ZoneName}));
 				}
 			})
-			
+
 			return deferred.promise;
 		},
 		getSpotPrices: function(nextToken) {
 			var ec2 = new aws.EC2();
-			
+
 			var params = {
 					Filters: [{Name: 'product-description', Values: ['Linux/UNIX']}],
 					StartTime: startDate
 			};
-			
+
 			if (nextToken) {
 				params.NextToken = nextToken;
 			}
-			
+
 			ec2.describeSpotPriceHistory(params, function(err, data) {
 				if (err) {
 					$rootScope.$broadcast('aws-spotprice-error', err);
@@ -443,6 +443,6 @@ angular.module('awsSetup')
 			return deferredWrapper(ec2, ec2.terminateInstances, {InstanceIds: [instanceId]});
 		}
 	};
-	
+
 	return service;
 }]);

@@ -143,8 +143,23 @@ angular.module('brendaWeb')
 - remove old route to _landing.html_
 - created new Angular component _landingPage.components.ts_, copy _landing.html_ to the new components _html_
 
-
-
+#### Attention: in this setup, using both routers doesn't work
+- AngularJS is the leading framework, we incremently upgrade components and downgrade (with the Update Lib) 
+to use them in the AngularJS context
+- Workaround: 
+  - Using only the AngularJS Routing and insert the Angular component tag in the _template_ (in _app.js_)
 ```typescript
-
+...
+  	views: {
+  		'credentials': {template: '<app-aws-setup></app-aws-setup>'},
+...
 ```
+
+### Replacing components with material design
+
+Using the _@angular/material_ library.
+
+- discared because the learning value is low
+
+### Upgrading the awsService to Agnular and TypeScript
+

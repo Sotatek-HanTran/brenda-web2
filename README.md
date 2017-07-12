@@ -12,3 +12,5 @@ WIP porting of [njeirath/brenda-web](https://github.com/njeirath/brenda-web) ang
 
 - https://github.com/angular/flex-layout
 - https://github.com/angular/material2
+- https://material.angular.io/components
+- https://material.angular.io/guide/getting-started

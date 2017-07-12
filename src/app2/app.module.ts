@@ -5,32 +5,8 @@ import {AppComponent} from './app.component';
 import {downgradeComponent, UpgradeModule} from '@angular/upgrade/static';
 import {awsServiceProvider} from './ajs-upgraded-providers';
 import {AwsSetupComponent} from './aws-setup/aws-setup.component';
-import {RouterModule, Routes, RouterOutlet, RouterLink, RouterLinkActive, UrlHandlingStrategy} from '@angular/router';
 import {LandingPageComponent} from "./landingPage/landing-page.component";
 import {RoutingEmptyComponent} from "app2/routing-empty/routing-empty.component";
-
-const appRoutes: Routes = [
-  {
-    path: '',
-    // pathMatch: 'full',
-    component: LandingPageComponent
-  }
-
-  /*,
-  {
-    path: '',
-    component: RoutingEmptyComponent
-  }*/
-];
-
-class CustomHandlingStrategy implements UrlHandlingStrategy {
-  shouldProcessUrl(url) {
-    console.info("url: "+url);
-    return url.toString().startsWith("/feature1") || url.toString() === "/";
-  }
-  extract(url) { return url; }
-  merge(url, whole) { return url; }
-}
 
 declare let angular: any;
 
@@ -44,16 +20,8 @@ angular.module('brendaWeb')
     downgradeComponent({component: AwsSetupComponent})
   )
   .directive(
-    'router-outlet',
-    downgradeComponent({component: RouterOutlet})
-  )
-  .directive(
-    'routerLink',
-    downgradeComponent({component: RouterLink})
-  )
-  .directive(
-    'routerLinkActive',
-    downgradeComponent({component: RouterLinkActive})
+    'landingPage',  // normalized name, the tag uses kebap case "app-aws-setup"
+    downgradeComponent({component: LandingPageComponent})
   )
 ;
 
@@ -66,19 +34,15 @@ angular.module('brendaWeb')
   ],
   imports: [
     BrowserModule,
-    UpgradeModule,
-    RouterModule.forRoot(
-      appRoutes,
-      {enableTracing: true, useHash: true} // <-- debugging purposes only
-    )
+    UpgradeModule
   ],
   providers: [
-    awsServiceProvider,
-    { provide: UrlHandlingStrategy, useClass: CustomHandlingStrategy }
+    awsServiceProvider
   ],
   entryComponents: [
     AppComponent,
-    AwsSetupComponent
+    AwsSetupComponent,
+    LandingPageComponent
   ]
 
   //bootstrap: [AppComponent]
