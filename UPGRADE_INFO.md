@@ -110,7 +110,7 @@ export class AwsSetupComponent {
 
 - Create the html view of the component. Copied the html from the old _awsSetup.html_ and then upgrade/convert old AngularJS directives
 
-```angular2html
+```html
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">AWS Credentials</h3>
@@ -162,4 +162,10 @@ Using the _@angular/material_ library.
 - discared because the learning value is low
 
 ### Upgrading the awsService to Agnular and TypeScript
+- removed wrapper AngularJS wrapper Service _aws.service.js_
+- upgrade _awsServcie.service.ts_ to Angular and Typesript
+  - copied to _app2/services_
+  - renamed to "_.ts_"
+  - npm install aws-sdk --save
+  - import _AWS_ the typescript way ```import * as AWS from 'aws-sdk';```
 
