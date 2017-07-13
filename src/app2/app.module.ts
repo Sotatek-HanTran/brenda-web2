@@ -2,11 +2,12 @@ import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
-import {downgradeComponent, UpgradeModule} from '@angular/upgrade/static';
+import {downgradeComponent, downgradeInjectable, UpgradeModule} from '@angular/upgrade/static';
 import {AwsSetupComponent} from './aws-setup/aws-setup.component';
 import {LandingPageComponent} from "./landingPage/landing-page.component";
 import {RoutingEmptyComponent} from "app2/routing-empty/routing-empty.component";
 import {localStorageProvider} from "./ajs-upgraded-providers";
+import {AwsService} from "./services/aws.service";
 
 declare let angular: any;
 
@@ -23,6 +24,10 @@ angular.module('brendaWeb')
     'landingPage',  // normalized name, the tag uses kebap case "app-aws-setup"
     downgradeComponent({component: LandingPageComponent})
   )
+  .factory(
+    'awsService',
+    downgradeInjectable(AwsService)
+  )
 ;
 
 @NgModule({
@@ -37,6 +42,7 @@ angular.module('brendaWeb')
     UpgradeModule
   ],
   providers: [
+    AwsService,
     localStorageProvider
   ],
   entryComponents: [

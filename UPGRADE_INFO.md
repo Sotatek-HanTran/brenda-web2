@@ -184,3 +184,37 @@ Using the _@angular/material_ library.
 ```typescript
 obj['propName'] = newValue;
 ```
+
+#### ng eject for aws-sdk (possibility)
+The aws-sdk isn't working with the ng/cli configuration of webpack. To use the webpack configuration proposed 
+from amazon http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/webpack.html ejecting is necessary.
+```typescript
+➜  brendaweb2 git:(master) ng eject
+==========================================================================================
+Ejection was successful.
+
+To run your builds, you now need to do the following commands:
+   - "npm run build" to build.
+   - "npm run test" to run unit tests.
+   - "npm start" to serve the app using webpack-dev-server.
+   - "npm run e2e" to run protractor.
+
+Running the equivalent CLI commands will result in an error.
+
+==========================================================================================
+Some packages were added. Please run "npm install".
+
+```
+#### using the global AWS variable
+Leave the javascript import in the _index.html_.
+The _AWS_ object is loaded in the _HTML_ page and available als global variable.
+Using the _AWS_ object in typescript using _declare_. 
+```typescript
+declare let AWS: any; 
+```
+
+
+## Links for aws-sdk in Angular-CLI
+- https://github.com/sharma02gaurav/es6-basecamp-ng2-weback
+- https://www.npmjs.com/package/es6-scaffolder
+- https://stackoverflow.com/questions/37041049/using-aws-sdk-with-angular2

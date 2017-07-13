@@ -23,6 +23,3 @@ WIP porting of [njeirath/brenda-web](https://github.com/njeirath/brenda-web) ang
 - https://material.angular.io/components
 - https://material.angular.io/guide/getting-started
 
-
-- https://github.com/sharma02gaurav/es6-basecamp-ng2-weback
-- https://www.npmjs.com/package/es6-scaffolder

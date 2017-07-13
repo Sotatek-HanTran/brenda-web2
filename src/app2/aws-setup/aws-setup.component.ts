@@ -13,7 +13,6 @@ export class AwsSetupComponent {
   awsSecret: String;
 
   constructor(awsService: AwsService) {
-    console.info('loaded AwsSetupComponent');
     this.awsService = awsService;
 
     this.awsRegion = awsService.getRegion();

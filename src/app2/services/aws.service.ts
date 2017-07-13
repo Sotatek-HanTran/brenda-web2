@@ -12,11 +12,11 @@
 //
 //You should have received a copy of the GNU General Public License
 //along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import * as AWS from 'aws-sdk';
 import * as log4javascript from 'log4javascript';
 import {Inject, Injectable} from '@angular/core';
 import {LOCAL_STORAGE_SERVICE} from "../ajs-upgraded-providers";
 
+declare let AWS: any; // workaround to use global var, because aws-sdk doesn't work with angular/cli
 
 @Injectable()
 export class AwsService {
@@ -27,7 +27,6 @@ export class AwsService {
   uriCache = {};
 
   constructor(@Inject(LOCAL_STORAGE_SERVICE) localStorageService: any) {
-    console.info('loaded AwsSetupComponent');
     this.localStorageService = localStorageService;
   };
 
