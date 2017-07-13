@@ -1,34 +1,36 @@
-//Brenda-Web -- Frontend for Blender
+// Brenda-Web -- Frontend for Blender
 //
-//Brenda-Web is free software: you can redistribute it and/or modify
-//it under the terms of the GNU General Public License as published by
-//the Free Software Foundation, either version 3 of the License, or
-//(at your option) any later version.
+// Brenda-Web is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//This program is distributed in the hope that it will be useful,
-//but WITHOUT ANY WARRANTY; without even the implied warranty of
-//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//GNU General Public License for more details.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//You should have received a copy of the GNU General Public License
-//along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import * as log4javascript from 'log4javascript';
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import {Inject, Injectable} from '@angular/core';
-import {LOCAL_STORAGE_SERVICE} from "../ajs-upgraded-providers";
+import {LOCAL_STORAGE_SERVICE} from '../ajs-upgraded-providers';
+import {EventService} from '../messaging/event.service';
+import {AwsEvent} from '../messaging/event.model';
 
 declare let AWS: any; // workaround to use global var, because aws-sdk doesn't work with angular/cli
 
 @Injectable()
 export class AwsService {
-
-  LOGGER = log4javascript.getLogger();
   startDate: any = new Date(new Date().getTime() - 6 * 60 * 60 * 1000);
   localStorageService: any;
+  eventService: EventService;
   uriCache = {};
 
-  constructor(@Inject(LOCAL_STORAGE_SERVICE) localStorageService: any) {
+  constructor(@Inject(LOCAL_STORAGE_SERVICE) localStorageService: any, eventService: EventService) {
     this.localStorageService = localStorageService;
+    this.eventService = eventService;
   };
+
 
   deferredWrapper(obj, func, params) {
     return new Promise<any>((resolve: Function, reject: Function) => {
@@ -44,7 +46,7 @@ export class AwsService {
 
   setCredentials(keyId, secret) {
     AWS.config.update({accessKeyId: keyId, secretAccessKey: secret});
-    this.LOGGER.info("Set keyId: " + keyId + " and secret: " + secret);
+    // this.LOGGER.info('Set keyId: ' + keyId + ' and secret: ' + secret);
   }
 
   getKeyId() {
@@ -65,7 +67,7 @@ export class AwsService {
 
   setRegion(region) {
     AWS.config.region = region;
-    this.LOGGER.info("Set region: " + region);
+    // this.LOGGER.info('Set region: ' + region);
   }
 
   getRegion() {
@@ -73,13 +75,14 @@ export class AwsService {
   }
 
   testCredentials() {
-    var ec2 = new AWS.EC2();
+    const ec2 = new AWS.EC2();
 
     return new Promise<any>((resolve: Function, reject: Function) => {
       ec2.describeKeyPairs({}, function (err, data) {
         if (err) {
           reject(String(err));
           // $rootScope.$broadcast('aws-login-error', String(err));
+          this.eventService.sendEvent(new AwsEvent(null, null, null));
         } else {
           resolve();
           // $rootScope.$broadcast('aws-login-success');
@@ -89,7 +92,7 @@ export class AwsService {
   }
 
   getQueues() {
-    var sqs = new AWS.SQS();
+    const sqs = new AWS.SQS();
     sqs.listQueues({}, function (err, data) {
       if (err) {
         // $rootScope.$broadcast('aws-sqs-error', String(err));
@@ -101,9 +104,9 @@ export class AwsService {
 
   sendToQueue(queueUrl, data) {
     this.localStorageService.set('awsQueue', queueUrl);
-    var sqs = new AWS.SQS();
+    const sqs = new AWS.SQS();
 
-    var sendStatus = {
+    const sendStatus = {
       total: data.length,
       success: 0,
       failed: 0,
@@ -120,7 +123,7 @@ export class AwsService {
 
     // $rootScope.$broadcast('aws-sqs-send-update', sendStatus.copy());
 
-    var entries = [];
+    let entries = [];
 
     data.forEach(function (item, i) {
       entries.push({
@@ -133,20 +136,20 @@ export class AwsService {
         // $rootScope.$broadcast('aws-sqs-send-update', sendStatus.copy());
 
         (function () {
-          var params = {
+          const params = {
             Entries: entries,
             QueueUrl: queueUrl
           };
 
-          sqs.sendMessageBatch(params, function (err, data) {
-            if (err) {
+          sqs.sendMessageBatch(params, function (sqsErr, sqsData) {
+            if (sqsErr) {
               sendStatus.failed += params.Entries.length;
               sendStatus.inFlight -= params.Entries.length;
             } else {
-              sendStatus.success += data.Successful.length;
-              sendStatus.failed += data.Failed.length;
-              sendStatus.inFlight -= data.Successful.length;
-              sendStatus.inFlight -= data.Failed.length;
+              sendStatus.success += sqsData.Successful.length;
+              sendStatus.failed += sqsData.Failed.length;
+              sendStatus.inFlight -= sqsData.Successful.length;
+              sendStatus.inFlight -= sqsData.Failed.length;
             }
 
             // $rootScope.$broadcast('aws-sqs-send-update', sendStatus.copy());
@@ -163,13 +166,13 @@ export class AwsService {
   }
 
   clearQueue(queueUrl) {
-    var sqs = new AWS.SQS();
+    const sqs = new AWS.SQS();
     return this.deferredWrapper(sqs, sqs.purgeQueue, {QueueUrl: queueUrl});
   }
 
   getQueueSize(queueUrl) {
-    var sqs = new AWS.SQS();
-    var params = {
+    const sqs = new AWS.SQS();
+    const params = {
       QueueUrl: queueUrl,
       AttributeNames: ['ApproximateNumberOfMessages', 'ApproximateNumberOfMessagesNotVisible']
     };
@@ -186,10 +189,10 @@ export class AwsService {
   }
 
   getKeyPairs(callback) {
-    var ec2 = new AWS.EC2();
+    const ec2 = new AWS.EC2();
     ec2.describeKeyPairs({}, function (err, data) {
       if (err) {
-        this.LOGGER.info(err);
+        // this.LOGGER.info(err);
         // $rootScope.$broadcast('aws-ec2-error', String(err));
       } else {
         return callback(data);
@@ -198,11 +201,11 @@ export class AwsService {
   }
 
   getLaunchSpecification(ami, keyPair, securityGroup, userData, instanceType, snapshots) {
-    let devs = [
+    const devs = [
       'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p'
     ];
 
-    let spec: object = {
+    const spec: object = {
       ImageId: ami,
       KeyName: keyPair,
       SecurityGroups: [securityGroup],
@@ -228,16 +231,16 @@ export class AwsService {
   }
 
   setTags(instances, tags, callback) {
-    var params = {
+    const params = {
       Resources: instances,
       Tags: tags
     };
 
-    var ec2 = new AWS.EC2();
+    const ec2 = new AWS.EC2();
     ec2.createTags(params, function (err, data) {
       if (err) {
-        //Try the call again after a little bit
-        this.LOGGER.info("Setting tags failed once, retrying");
+        // Try the call again after a little bit
+        // this.LOGGER.info('Setting tags failed once, retrying');
 
         setTimeout(() => {
           ec2.createTags(params, callback);
@@ -250,9 +253,9 @@ export class AwsService {
   }
 
   requestSpot(ami, keyPair, securityGroup, userData, instanceType, snapshots, spotPrice, count, type, queueName, s3Destination, statusCallback) {
-    var spec = this.getLaunchSpecification(ami, keyPair, securityGroup, userData, instanceType, snapshots);
+    const spec = this.getLaunchSpecification(ami, keyPair, securityGroup, userData, instanceType, snapshots);
 
-    var params = {
+    const params = {
       // DryRun: true,
       SpotPrice: String(spotPrice),
       InstanceCount: parseInt(count, 10),
@@ -260,23 +263,23 @@ export class AwsService {
       Type: type
     };
 
-    var self = this;
+    const self = this;
 
-    var ec2 = new AWS.EC2();
+    const ec2 = new AWS.EC2();
     ec2.requestSpotInstances(params, function (err, data) {
       if (err) {
-        this.LOGGER.info(err);
+        // this.LOGGER.info(err);
         statusCallback('danger', String(err));
       } else {
-        this.LOGGER.info(data);
-        var spotRequests = data.SpotInstanceRequests.map(function (item) {
+        // this.LOGGER.info(data);
+        const spotRequests = data.SpotInstanceRequests.map(function (item) {
           return item.SpotInstanceRequestId;
         });
         self.setTags(spotRequests, [{Key: 'brenda-queue', Value: queueName}, {
           Key: 'brenda-dest',
           Value: s3Destination
-        }], function (err, data) {
-          if (err) {
+        }], function (setTagsErr) {
+          if (setTagsErr) {
             statusCallback('warning', 'Spot instances requested but could not set tags (may affect dashboard)');
           } else {
             statusCallback('success', 'Spot instances requested');
@@ -288,29 +291,29 @@ export class AwsService {
   }
 
   requestOndemand(ami, keyPair, securityGroup, userData, instanceType, snapshots, count, queueName, s3Destination, statusCallback) {
-    let spec: any = this.getLaunchSpecification(ami, keyPair, securityGroup, userData, instanceType, snapshots);
+    const spec: any = this.getLaunchSpecification(ami, keyPair, securityGroup, userData, instanceType, snapshots);
     spec['MinCount'] = count;
     spec['MaxCount'] = count;
     spec['InstanceInitiatedShutdownBehavior'] = 'terminate';
     // spec.DryRun = true;
 
-    let self = this;
+    const self = this;
 
-    let ec2 = new AWS.EC2();
+    const ec2 = new AWS.EC2();
     ec2.runInstances(spec, function (err, data) {
       if (err) {
-        this.LOGGER.info(err);
+        // this.LOGGER.info(err);
         statusCallback('danger', String(err));
       } else {
-        this.LOGGER.info(data);
-        var instanceIds = data.Instances.map(function (item) {
+        // this.LOGGER.info(data);
+        const instanceIds = data.Instances.map(function (item) {
           return item.InstanceId;
         });
         self.setTags(instanceIds, [{Key: 'brenda-queue', Value: queueName}, {
           Key: 'brenda-dest',
           Value: s3Destination
-        }], function (err, data) {
-          if (err) {
+        }], function (setTagsErr) {
+          if (setTagsErr) {
             statusCallback('warning', 'On demand instances requested but could not set tags (may affect dashboard)');
           } else {
             statusCallback('success', 'On demand instances requested');
@@ -321,7 +324,7 @@ export class AwsService {
   }
 
   getSpotRequests() {
-    var ec2 = new AWS.EC2();
+    const ec2 = new AWS.EC2();
     return this.deferredWrapper(ec2, ec2.describeSpotInstanceRequests, {
       Filters: [{
         Name: 'tag-key',
@@ -331,9 +334,9 @@ export class AwsService {
   }
 
   getInstanceDetails(instanceList) {
-    var ec2 = new AWS.EC2();
+    const ec2 = new AWS.EC2();
 
-    var params = {};
+    const params = {};
     if (instanceList) {
       params['InstanceIds'] = instanceList;
     } else {
@@ -344,19 +347,19 @@ export class AwsService {
   }
 
   getSecurityGroups(groupName) {
-    var ec2 = new AWS.EC2();
+    const ec2 = new AWS.EC2();
     return this.deferredWrapper(ec2, ec2.describeSecurityGroups, {GroupNames: [groupName]});
   }
 
   createSecurityGroup() {
-    var ec2 = new AWS.EC2();
+    const ec2 = new AWS.EC2();
 
-    var sgParams = {
+    const sgParams = {
       GroupName: 'brenda-web',
       Description: 'Security group used by brenda-web.com'
     };
 
-    var ingressParams = {
+    const ingressParams = {
       IpPermissions: [{
         FromPort: 22,
         IpProtocol: 'tcp',
@@ -387,9 +390,9 @@ export class AwsService {
           reject(String(err));
         } else {
           ingressParams['GroupId'] = data.GroupId;
-          ec2.authorizeSecurityGroupIngress(ingressParams, function (err, data) {
-            if (err) {
-              reject(String(err));
+          ec2.authorizeSecurityGroupIngress(ingressParams, function (ec2Err) {
+            if (ec2Err) {
+              reject(String(ec2Err));
             } else {
               resolve();
             }
@@ -400,32 +403,32 @@ export class AwsService {
   }
 
   createQueue(queueName) {
-    var params = {
+    const params = {
       QueueName: queueName,
       Attributes: {
         VisibilityTimeout: '120'
       }
     };
 
-    var sqs = new AWS.SQS();
+    const sqs = new AWS.SQS();
     return this.deferredWrapper(sqs, sqs.createQueue, params);
   }
 
   listObjects(bucket) {
-    var s3 = new AWS.S3();
+    const s3 = new AWS.S3();
     return this.deferredWrapper(s3, s3.listObjects, {Bucket: bucket});
   }
 
   getObjectUri(bucket, key) {
-    var cacheKey = bucket + '-' + key;
-    var cached = this.uriCache[cacheKey];
+    const cacheKey = bucket + '-' + key;
+    const cached = this.uriCache[cacheKey];
 
-    //If cached and not going to expire within the next two minutes
+    // If cached and not going to expire within the next two minutes
     if (cached && (cached.expiration > new Date(new Date().valueOf() + 120 * 1000))) {
       return cached.url;
     } else {
-      let s3 = new AWS.S3();
-      let url = s3.getSignedUrl('getObject', {Bucket: bucket, Key: key, Expires: 3600});
+      const s3 = new AWS.S3();
+      const url = s3.getSignedUrl('getObject', {Bucket: bucket, Key: key, Expires: 3600});
       this.uriCache[cacheKey] = {url: url, expiration: new Date(new Date().valueOf() + 3600 * 1000)}
       return url;
     }
@@ -434,7 +437,7 @@ export class AwsService {
   }
 
   getAvailabilityZones() {
-    let ec2 = new AWS.EC2();
+    const ec2 = new AWS.EC2();
 
     return new Promise<any>((resolve: Function, reject: Function) => {
       ec2.describeAvailabilityZones({}, function (err, data) {
@@ -450,9 +453,9 @@ export class AwsService {
   }
 
   getSpotPrices(nextToken) {
-    var ec2 = new AWS.EC2();
+    const ec2 = new AWS.EC2();
 
-    var params = {
+    const params = {
       Filters: [{Name: 'product-description', Values: ['Linux/UNIX']}],
       StartTime: this.startDate
     };
@@ -471,12 +474,12 @@ export class AwsService {
   }
 
   cancelSpotRequest(spotId) {
-    var ec2 = new AWS.EC2();
+    const ec2 = new AWS.EC2();
     return this.deferredWrapper(ec2, ec2.cancelSpotInstanceRequests, {SpotInstanceRequestIds: [spotId]})
   }
 
   terminateInstance(instanceId) {
-    var ec2 = new AWS.EC2();
+    const ec2 = new AWS.EC2();
     return this.deferredWrapper(ec2, ec2.terminateInstances, {InstanceIds: [instanceId]});
   }
 
