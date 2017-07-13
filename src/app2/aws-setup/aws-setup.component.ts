@@ -1,5 +1,5 @@
 import {Component, Inject} from '@angular/core';
-import {AWS_SERVICE} from 'app2/ajs-upgraded-providers';
+import {AwsService} from "../services/aws.service";
 
 @Component({
   selector: 'app-aws-setup',
@@ -12,7 +12,7 @@ export class AwsSetupComponent {
   awsKeyId: String;
   awsSecret: String;
 
-  constructor(@Inject(AWS_SERVICE) awsService: any) {
+  constructor(awsService: AwsService) {
     console.info('loaded AwsSetupComponent');
     this.awsService = awsService;
 

@@ -3,6 +3,7 @@ WIP porting of [njeirath/brenda-web](https://github.com/njeirath/brenda-web) ang
 
 ## Dev info
 - Used node version 8.1.3 (2017-07-11)
+- [Upgrade info from AngularJS 1 to Angular 2/4](UPGRADE_INFO.md)
 
 ## Links
 - https://angular.io/guide/upgrade
@@ -10,7 +11,18 @@ WIP porting of [njeirath/brenda-web](https://github.com/njeirath/brenda-web) ang
 - https://angular.io/guide/styleguide
 
 
+- https://angular.io/guide/cheatsheet
+
+
+- http://stritti.github.io/log4js/
+- https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/log4js
+
+
 - https://github.com/angular/flex-layout
 - https://github.com/angular/material2
 - https://material.angular.io/components
 - https://material.angular.io/guide/getting-started
+
+
+- https://github.com/sharma02gaurav/es6-basecamp-ng2-weback
+- https://www.npmjs.com/package/es6-scaffolder

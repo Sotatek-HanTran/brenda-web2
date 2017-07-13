@@ -151,7 +151,7 @@ to use them in the AngularJS context
 ```typescript
 ...
   	views: {
-  		'credentials': {template: '<app-aws-setup></app-aws-setup>'},
+  		'credentials': {template: '<app-aws-setup></app-aws-setup>'}
 ...
 ```
 
@@ -168,4 +168,19 @@ Using the _@angular/material_ library.
   - renamed to "_.ts_"
   - npm install aws-sdk --save
   - import _AWS_ the typescript way ```import * as AWS from 'aws-sdk';```
-
+  - $q.refered ersetzen durch ES6 pattern mit Promise
+```typescript
+ return new Promise<any>((resolve: Function, reject: Function) => {
+      func.call(obj, params, function (err, data) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+```
+  - appending a property to an existing object only works with following syntax
+```typescript
+obj['propName'] = newValue;
+```

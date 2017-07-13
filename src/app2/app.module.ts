@@ -3,10 +3,10 @@ import {NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
 import {downgradeComponent, UpgradeModule} from '@angular/upgrade/static';
-import {awsServiceProvider} from './ajs-upgraded-providers';
 import {AwsSetupComponent} from './aws-setup/aws-setup.component';
 import {LandingPageComponent} from "./landingPage/landing-page.component";
 import {RoutingEmptyComponent} from "app2/routing-empty/routing-empty.component";
+import {localStorageProvider} from "./ajs-upgraded-providers";
 
 declare let angular: any;
 
@@ -37,12 +37,12 @@ angular.module('brendaWeb')
     UpgradeModule
   ],
   providers: [
-    awsServiceProvider
+    localStorageProvider
   ],
   entryComponents: [
     AppComponent,
     AwsSetupComponent,
-    LandingPageComponent
+    LandingPageComponent,
   ]
 
   //bootstrap: [AppComponent]
