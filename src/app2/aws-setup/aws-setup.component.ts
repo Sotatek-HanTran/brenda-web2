@@ -1,5 +1,5 @@
-import {Component, Inject} from '@angular/core';
-import {AwsService} from "../services/aws.service";
+import {Component} from '@angular/core';
+import {AwsService} from '../services/aws.service';
 
 @Component({
   selector: 'app-aws-setup',
