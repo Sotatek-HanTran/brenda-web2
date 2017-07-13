@@ -12,12 +12,13 @@
 //GNU General Public License for more details.
 //
 //You should have received a copy of the GNU General Public License
-//along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+//along with this program.  If not, see <http://www.gnu.org/licenses/>.
 'use strict';
 
 angular.module('awsSetup')
-.controller('JobSetupCtrl', ['$scope', 'awsService', '$uibModal', '$interval', 'localStorageService', function($scope, awsService, $uibModal, $interval, localStorageService) {
+.controller('JobSetupCtrl', ['$scope', 'awsService', '$uibModal', '$interval', 'localStorageService', 'eventService', function($scope, awsService, $uibModal, $interval, localStorageService, eventService) {
     $scope.setInitialState = function () {
+        console.log('eventService injected in JobSetupCtrl. '+eventService);
         $scope.queues = [];
 
         $scope.queueSize = 'No Queue Selected';
@@ -57,41 +58,41 @@ angular.module('awsSetup')
 	$scope.$watch('shuffle', function(value) {
 		localStorageService.set('shuffleQ', value);
 	});
-	
+
 	awsService.getQueues();
-	
+
 	$scope.$watch('queue.workQueue', function(value) {
 		if (value !== '') {
 			localStorageService.set('workQueue', value);
 		}
 	});
-	
+
 	$scope.$on('brenda-web-credentials-updated', function(event, data) {
 		$scope.refreshQueues();
 	});
-	
+
 	$scope.refreshQueues = function() {
 		awsService.getQueues();
 	};
-	
+
 	$scope.queueAlerts = [];
-	
+
 	$scope.closeAlert = function(index) {
 	    $scope.queueAlerts.splice(index, 1);
 	};
-	
+
 	$scope.addQueue = function() {
 		var queueModal = $uibModal.open({
 			animation: true,
 			templateUrl: 'awsSetup/createQueue.html',
 			controller: 'CreateQueueCtrl'
 		});
-		
+
 		queueModal.result.then(function(queueName) {
 			awsService.createQueue(queueName)
 			.then(function() {
 				$scope.queueAlerts.push({type: 'success', msg: 'Queue ' + queueName + ' successfully created! (Note: may take up to 60 seconds for queue to be available)'});
-				
+
 				$interval(awsService.getQueues, 30000, 2);
 			}, function(err) {
 				$scope.queueAlerts.push({type: 'danger', msg: 'Create ' + queueName + ': ' + String(err)});
@@ -152,49 +153,53 @@ angular.module('awsSetup')
                 list.push(cmd);
             }
         }
-		
+
 		return list;
 	};
-	
+
 	$scope.sendWork = function() {
 		var list = $scope.workList();
-		
+
 		if ($scope.shuffle) {
 			for (var i = list.length - 1; i >= 0; i--) {
 				var randomIndex = Math.floor(Math.random()*(i+1));
-				
+
 				var iItem = list[randomIndex];
 				list[randomIndex] = list[i];
 				list[i] = iItem;
 			}
 		}
-		
+
 		awsService.sendToQueue($scope.queue.workQueue, list);
 	};
-	
+
 	$scope.clearQueue = function() {
 		awsService.clearQueue($scope.queue.workQueue);
 	};
-	
+
 	$scope.sendStatus = {
 				total: 0,
 				success: 0,
 				failed: 0,
 				inFlight: 0
 	};
-	
-	$scope.$on('aws-sqs-send-update', function(event, data) {
-		$scope.sendStatus = data;
-	});
-	
-	$scope.$on('aws-sqs-success', function(event, args) {
-		$scope.queues = [];
-		
-		args.QueueUrls.forEach(function(entry) {
-			$scope.queues.push(entry);
-		});
-		
-		$scope.queue.workQueue = localStorageService.get('workQueue');
-		$scope.$digest();
-	});
+
+  eventService.getObservable().subscribe(function (observable) {
+    console.log('eventTriggered: ', observable.event);
+    if (observable.event.type === 'aws-sqs-send-update') {
+      console.log('is aws-sqs-send-update event');
+      $scope.sendStatus = observable.event.payload;
+    } else if (observable.event.type === 'aws-sqs-success') {
+      console.log('is aws-sqs-success event');
+      $scope.queues = [];
+
+      observable.event.payload.QueueUrls.forEach(function (entry) {
+        $scope.queues.push(entry);
+      });
+
+      $scope.queue.workQueue = localStorageService.get('workQueue');
+      $scope.$digest();
+    }
+  });
+
 }]);

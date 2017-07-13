@@ -1,4 +1,4 @@
-import {Component, Inject} from '@angular/core';
+import {Component} from '@angular/core';
 
 @Component({
   selector: 'app-root',
@@ -7,8 +7,8 @@ import {Component, Inject} from '@angular/core';
 })
 export class AppComponent {
 
+  title = 'app2';
+
   constructor() {
   }
-
-  title = 'app2';
 }

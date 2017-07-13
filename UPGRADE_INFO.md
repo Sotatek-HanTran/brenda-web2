@@ -167,8 +167,9 @@ Using the _@angular/material_ library.
   - copied to _app2/services_
   - renamed to "_.ts_"
   - npm install aws-sdk --save
-  - import _AWS_ the typescript way ```import * as AWS from 'aws-sdk';```
   - $q.refered ersetzen durch ES6 pattern mit Promise
+  - The old code generated an object _service_ and returned it. For the new function, the _service_ object was removed
+  and the code was moved one level up.
 ```typescript
  return new Promise<any>((resolve: Function, reject: Function) => {
       func.call(obj, params, function (err, data) {
@@ -205,6 +206,7 @@ Running the equivalent CLI commands will result in an error.
 Some packages were added. Please run "npm install".
 
 ```
+
 #### using the global AWS variable
 Leave the javascript import in the _index.html_.
 The _AWS_ object is loaded in the _HTML_ page and available als global variable.
@@ -212,6 +214,71 @@ Using the _AWS_ object in typescript using _declare_.
 ```typescript
 declare let AWS: any; 
 ```
+
+#### replacing _$broadcast_ with an EventService 
+- Creating the _EventService_ holding an _rxjs/Subject_
+- The Service can send events through the Subject and it exposes an Observable to subscribe to.
+- The Subject emits an AwsEvent object which had diffent types.
+- Used a type instead of an enum for the types, because its possible to use it in an ES5/AngularJS context.
+```typescript
+export type EventType =
+      'aws-login-error' |
+      'aws-login-success' |
+      'aws-sqs-error' |
+      'aws-sqs-success' |
+      'aws-sqs-send-update' |
+      'aws-ec2-error' |
+      'aws-spotprice-error' |
+      'aws-spotprice-update';
+```
+- The subscribing 'old' code can check against the string not a number from the enum. This way its still readable.
+- Adding the _EventService_ to the providers.
+- After downgrading the _EventService_ can be injected to the old AngularJS modules. AngularJS example:
+```typescript
+  eventService.getObservable().subscribe(function (observable) {
+    if (observable.event.type === 'aws-sqs-send-update') {  // checking the type
+      console.log('is aws-sqs-send-update event');
+      $scope.sendStatus = observable.event.payload;  // some old code
+    } else if (observable.event.type === 'aws-sqs-success') {  // checking the type
+      // ... some old code
+    }
+  });
+```
+
+
+## Logging
+For logging it was added the _angular2-logging_ library. https://github.com/code-chunks/angular2-logger
+```
+npm install --save angular2-logging
+```
+
+Added the logger to _app.modules.ts_:
+```typescript
+import {LOG_LOGGER_PROVIDERS} from 'angular2-logger/core';
+
+...
+  providers: [
+    LOG_LOGGER_PROVIDERS,
+...
+```
+There are more Logging Providers for setting the log level. 
+- ERROR_LOGGER_PROVIDERS
+- WARN_LOGGER_PROVIDERS
+- INFO_LOGGER_PROVIDERS
+- DEBUG_LOGGER_PROVIDERS
+- LOG_LOGGER_PROVIDERS
+- OFF_LOGGER_PROVIDERS
+
+To log something, simply inject the Logger to the component or service and use it.
+```typescript
+  constructor( private logger: Logger)
+  ...
+    this.logger.info('something you want to log...');
+```
+
+
+Futher documentation on the github page of the logging library.
+
 
 
 ## Links for aws-sdk in Angular-CLI

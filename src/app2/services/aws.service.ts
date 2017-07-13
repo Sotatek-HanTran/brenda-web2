@@ -15,21 +15,19 @@
 import {Inject, Injectable} from '@angular/core';
 import {LOCAL_STORAGE_SERVICE} from '../ajs-upgraded-providers';
 import {EventService} from '../messaging/event.service';
-import {AwsEvent} from '../messaging/event.model';
+import {Logger} from 'angular2-logger/core';
 
 declare let AWS: any; // workaround to use global var, because aws-sdk doesn't work with angular/cli
 
 @Injectable()
 export class AwsService {
   startDate: any = new Date(new Date().getTime() - 6 * 60 * 60 * 1000);
-  localStorageService: any;
-  eventService: EventService;
   uriCache = {};
 
-  constructor(@Inject(LOCAL_STORAGE_SERVICE) localStorageService: any, eventService: EventService) {
-    this.localStorageService = localStorageService;
-    this.eventService = eventService;
-  };
+  constructor( private logger: Logger,
+               @Inject(LOCAL_STORAGE_SERVICE) private localStorageService: any,
+               private eventService: EventService) {
+  }
 
 
   deferredWrapper(obj, func, params) {
@@ -46,7 +44,6 @@ export class AwsService {
 
   setCredentials(keyId, secret) {
     AWS.config.update({accessKeyId: keyId, secretAccessKey: secret});
-    // this.LOGGER.info('Set keyId: ' + keyId + ' and secret: ' + secret);
   }
 
   getKeyId() {
@@ -67,7 +64,7 @@ export class AwsService {
 
   setRegion(region) {
     AWS.config.region = region;
-    // this.LOGGER.info('Set region: ' + region);
+    this.logger.info('Set region: ' + region);
   }
 
   getRegion() {
@@ -78,14 +75,13 @@ export class AwsService {
     const ec2 = new AWS.EC2();
 
     return new Promise<any>((resolve: Function, reject: Function) => {
-      ec2.describeKeyPairs({}, function (err, data) {
+      ec2.describeKeyPairs({}, (err, data) => {
         if (err) {
           reject(String(err));
-          // $rootScope.$broadcast('aws-login-error', String(err));
-          this.eventService.sendEvent(new AwsEvent(null, null, null));
+          this.eventService.sendEvent('aws-login-error', String(err));
         } else {
           resolve();
-          // $rootScope.$broadcast('aws-login-success');
+          this.eventService.sendEvent('aws-login-success');
         }
       });
     });
@@ -93,11 +89,11 @@ export class AwsService {
 
   getQueues() {
     const sqs = new AWS.SQS();
-    sqs.listQueues({}, function (err, data) {
+    sqs.listQueues({}, (err, data) => {
       if (err) {
-        // $rootScope.$broadcast('aws-sqs-error', String(err));
+        this.eventService.sendEvent('aws-sqs-error', String(err));
       } else {
-        // $rootScope.$broadcast('aws-sqs-success', data);
+        this.eventService.sendEvent('aws-sqs-success', data);
       }
     });
   }
@@ -121,11 +117,11 @@ export class AwsService {
       }
     };
 
-    // $rootScope.$broadcast('aws-sqs-send-update', sendStatus.copy());
+    this.eventService.sendEvent('aws-sqs-send-update', sendStatus.copy());
 
     let entries = [];
 
-    data.forEach(function (item, i) {
+    data.forEach((item, i) => {
       entries.push({
         MessageBody: btoa(item),
         Id: String(i)
@@ -133,28 +129,26 @@ export class AwsService {
 
       if ((entries.length === 10) || ( i === (data.length - 1))) {
         sendStatus.inFlight += entries.length;
-        // $rootScope.$broadcast('aws-sqs-send-update', sendStatus.copy());
+        this.eventService.sendEvent('aws-sqs-send-update', sendStatus.copy());
 
-        (function () {
-          const params = {
-            Entries: entries,
-            QueueUrl: queueUrl
-          };
+        const params = {
+          Entries: entries,
+          QueueUrl: queueUrl
+        };
 
-          sqs.sendMessageBatch(params, function (sqsErr, sqsData) {
-            if (sqsErr) {
-              sendStatus.failed += params.Entries.length;
-              sendStatus.inFlight -= params.Entries.length;
-            } else {
-              sendStatus.success += sqsData.Successful.length;
-              sendStatus.failed += sqsData.Failed.length;
-              sendStatus.inFlight -= sqsData.Successful.length;
-              sendStatus.inFlight -= sqsData.Failed.length;
-            }
+        sqs.sendMessageBatch(params, (sqsErr, sqsData) => {
+          if (sqsErr) {
+            sendStatus.failed += params.Entries.length;
+            sendStatus.inFlight -= params.Entries.length;
+          } else {
+            sendStatus.success += sqsData.Successful.length;
+            sendStatus.failed += sqsData.Failed.length;
+            sendStatus.inFlight -= sqsData.Successful.length;
+            sendStatus.inFlight -= sqsData.Failed.length;
+          }
 
-            // $rootScope.$broadcast('aws-sqs-send-update', sendStatus.copy());
-          });
-        }());
+          this.eventService.sendEvent('aws-sqs-send-update', sendStatus.copy());
+        });
 
         entries = [];
       }
@@ -190,10 +184,10 @@ export class AwsService {
 
   getKeyPairs(callback) {
     const ec2 = new AWS.EC2();
-    ec2.describeKeyPairs({}, function (err, data) {
+    ec2.describeKeyPairs({}, (err, data) => {
       if (err) {
-        // this.LOGGER.info(err);
-        // $rootScope.$broadcast('aws-ec2-error', String(err));
+        this.logger.info(err);
+        this.eventService.sendEvent('aws-ec2-error', String(err));
       } else {
         return callback(data);
       }
@@ -240,7 +234,7 @@ export class AwsService {
     ec2.createTags(params, function (err, data) {
       if (err) {
         // Try the call again after a little bit
-        // this.LOGGER.info('Setting tags failed once, retrying');
+        this.logger.info('Setting tags failed once, retrying');
 
         setTimeout(() => {
           ec2.createTags(params, callback);
@@ -252,7 +246,8 @@ export class AwsService {
     });
   }
 
-  requestSpot(ami, keyPair, securityGroup, userData, instanceType, snapshots, spotPrice, count, type, queueName, s3Destination, statusCallback) {
+  requestSpot(ami, keyPair, securityGroup, userData, instanceType, snapshots,
+              spotPrice, count, type, queueName, s3Destination, statusCallback) {
     const spec = this.getLaunchSpecification(ami, keyPair, securityGroup, userData, instanceType, snapshots);
 
     const params = {
@@ -263,19 +258,17 @@ export class AwsService {
       Type: type
     };
 
-    const self = this;
-
     const ec2 = new AWS.EC2();
-    ec2.requestSpotInstances(params, function (err, data) {
+    ec2.requestSpotInstances(params, (err, data) => {
       if (err) {
-        // this.LOGGER.info(err);
+        this.logger.info(err);
         statusCallback('danger', String(err));
       } else {
-        // this.LOGGER.info(data);
-        const spotRequests = data.SpotInstanceRequests.map(function (item) {
+        this.logger.info(data);
+        const spotRequests = data.SpotInstanceRequests.map((item) => {
           return item.SpotInstanceRequestId;
         });
-        self.setTags(spotRequests, [{Key: 'brenda-queue', Value: queueName}, {
+        this.setTags(spotRequests, [{Key: 'brenda-queue', Value: queueName}, {
           Key: 'brenda-dest',
           Value: s3Destination
         }], function (setTagsErr) {
@@ -302,10 +295,10 @@ export class AwsService {
     const ec2 = new AWS.EC2();
     ec2.runInstances(spec, function (err, data) {
       if (err) {
-        // this.LOGGER.info(err);
+        this.logger.info(err);
         statusCallback('danger', String(err));
       } else {
-        // this.LOGGER.info(data);
+        this.logger.info(data);
         const instanceIds = data.Instances.map(function (item) {
           return item.InstanceId;
         });
@@ -429,7 +422,7 @@ export class AwsService {
     } else {
       const s3 = new AWS.S3();
       const url = s3.getSignedUrl('getObject', {Bucket: bucket, Key: key, Expires: 3600});
-      this.uriCache[cacheKey] = {url: url, expiration: new Date(new Date().valueOf() + 3600 * 1000)}
+      this.uriCache[cacheKey] = {url: url, expiration: new Date(new Date().valueOf() + 3600 * 1000)};
       return url;
     }
 
@@ -464,11 +457,11 @@ export class AwsService {
       params['NextToken'] = nextToken;
     }
 
-    ec2.describeSpotPriceHistory(params, function (err, data) {
+    ec2.describeSpotPriceHistory(params, (err, data) => {
       if (err) {
-        // $rootScope.$broadcast('aws-spotprice-error', err);
+        this.eventService.sendEvent('aws-spotprice-error', err);
       } else {
-        // $rootScope.$broadcast('aws-spotprice-update', data);
+        this.eventService.sendEvent('aws-spotprice-update', data);
       }
     });
   }
@@ -484,4 +477,3 @@ export class AwsService {
   }
 
 }
-;

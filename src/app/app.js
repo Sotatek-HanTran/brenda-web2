@@ -32,7 +32,7 @@ config(['$stateProvider', function($stateProvider) {
   $stateProvider
     .state('landing', {
       url: '',
-      template: '<landing-page></landing-page>'
+      template: '<app-landing-page></app-landing-page>'
     }).state('setup', {
     templateUrl: 'app/jobSetup/jobSetup.partial.html',
     controller: 'SetupCtrl'

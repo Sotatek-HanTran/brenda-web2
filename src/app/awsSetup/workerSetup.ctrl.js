@@ -16,7 +16,7 @@
 'use strict';
 
 angular.module('awsSetup')
-.controller('WorkerSetupCtrl', ['$scope', 'localStorageService', '$http', 'awsService', '$q', '$analytics', function($scope, localStorageService, $http, awsService, $q, $analytics) {
+.controller('WorkerSetupCtrl', ['$scope', 'localStorageService', '$http', 'awsService', '$q', '$analytics', 'eventService', function($scope, localStorageService, $http, awsService, $q, $analytics, eventService) {
 	//Get list of AMIs to choose from
 	$scope.amis = [];
 
@@ -50,31 +50,41 @@ angular.module('awsSetup')
 		})
 	};
 
-	$scope.$on('aws-spotprice-update', function(event, data) {
-		data.SpotPriceHistory.forEach(function(price) {
-			var instance = $scope.instances.find(function(inst) {
-				return inst.name === price.InstanceType;
-			});
+  $scope.spotErrors = {};
 
-			if (!instance) {
-				console.log(price.InstanceType + " not found");
-			} else {
-				if (!instance.spotPrices[price.AvailabilityZone] || instance.spotPrices[price.AvailabilityZone].tstamp < price.Timestamp) {
-					instance.spotPrices[price.AvailabilityZone] = {price: price.SpotPrice, tstamp: price.Timestamp};
-				}
-			}
-		});
 
-		if (data.NextToken) {
-			awsService.getSpotPrices(data.NextToken);
-		}
-	});
 
-	$scope.spotErrors = {};
 
-	$scope.$on('aws-spotprice-error', function(event, data) {
-		$scope.spotErrors.error = data;
-	});
+
+  eventService.getObservable().subscribe(function (observable) {
+    console.log('eventTriggered: ', observable.event);
+    if (observable.event.type === 'aws-spotprice-update') {
+      console.log('is aws-spotprice-update event');
+
+      observable.event.payload.SpotPriceHistory.forEach(function (price) {
+        var instance = $scope.instances.find(function (inst) {
+          return inst.name === price.InstanceType;
+        });
+
+        if (!instance) {
+          console.log(price.InstanceType + " not found");
+        } else {
+          if (!instance.spotPrices[price.AvailabilityZone] || instance.spotPrices[price.AvailabilityZone].tstamp < price.Timestamp) {
+            instance.spotPrices[price.AvailabilityZone] = {price: price.SpotPrice, tstamp: price.Timestamp};
+          }
+        }
+      });
+
+      if (observable.event.payload.NextToken) {
+        awsService.getSpotPrices(observable.event.payload.NextToken);
+      }
+    } else if (observable.event.type === 'aws-spotprice-error') {
+      console.log('is aws-spotprice-error event');
+      $scope.spotErrors.error = observable.event.payload;
+    }
+  });
+
+
 
 	$scope.updateTypes = function() {
 		$q.all([$http.get('assets/instances.json'), awsService.getAvailabilityZones()])

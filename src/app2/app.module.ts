@@ -5,10 +5,10 @@ import {AppComponent} from './app.component';
 import {downgradeComponent, downgradeInjectable, UpgradeModule} from '@angular/upgrade/static';
 import {AwsSetupComponent} from './aws-setup/aws-setup.component';
 import {LandingPageComponent} from './landingPage/landing-page.component';
-import {RoutingEmptyComponent} from 'app2/routing-empty/routing-empty.component';
 import {localStorageProvider} from './ajs-upgraded-providers';
 import {AwsService} from './services/aws.service';
 import {EventService} from './messaging/event.service';
+import {LOG_LOGGER_PROVIDERS} from 'angular2-logger/core';
 
 declare let angular: any;
 
@@ -22,7 +22,7 @@ angular.module('brendaWeb')
     downgradeComponent({component: AwsSetupComponent})
   )
   .directive(
-    'landingPage',  // normalized name, the tag uses kebab case "app-aws-setup"
+    'appLandingPage',  // normalized name, the tag uses kebab case "app-aws-setup"
     downgradeComponent({component: LandingPageComponent})
   )
   .factory(
@@ -39,14 +39,14 @@ angular.module('brendaWeb')
   declarations: [
     AppComponent,
     AwsSetupComponent,
-    LandingPageComponent,
-    RoutingEmptyComponent
+    LandingPageComponent
   ],
   imports: [
     BrowserModule,
     UpgradeModule
   ],
   providers: [
+    LOG_LOGGER_PROVIDERS,
     AwsService,
     localStorageProvider,
     EventService
