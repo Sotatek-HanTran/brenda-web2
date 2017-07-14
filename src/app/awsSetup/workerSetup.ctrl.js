@@ -54,30 +54,31 @@ angular.module('awsSetup')
 
   eventService.getObservable().filter(function (event) {return event.type === 'aws-spotprice-update';}).subscribe(function (event) {
     console.log('eventTriggered: ', event);
-    if (event.type === 'aws-spotprice-update') {
-      console.log('is aws-spotprice-update event');
+    console.log('is aws-spotprice-update event');
 
-      event.payload.SpotPriceHistory.forEach(function (price) {
-        var instance = $scope.instances.find(function (inst) {
-          return inst.name === price.InstanceType;
-        });
-
-        if (!instance) {
-          console.log(price.InstanceType + " not found");
-        } else {
-          if (!instance.spotPrices[price.AvailabilityZone] || instance.spotPrices[price.AvailabilityZone].tstamp < price.Timestamp) {
-            instance.spotPrices[price.AvailabilityZone] = {price: price.SpotPrice, tstamp: price.Timestamp};
-          }
-        }
+    event.payload.SpotPriceHistory.forEach(function (price) {
+      var instance = $scope.instances.find(function (inst) {
+        return inst.name === price.InstanceType;
       });
 
-      if (event.payload.NextToken) {
-        awsService.getSpotPrices(event.payload.NextToken);
+      if (!instance) {
+        console.log(price.InstanceType + " not found");
+      } else {
+        if (!instance.spotPrices[price.AvailabilityZone] || instance.spotPrices[price.AvailabilityZone].tstamp < price.Timestamp) {
+          instance.spotPrices[price.AvailabilityZone] = {price: price.SpotPrice, tstamp: price.Timestamp};
+        }
       }
-    } else if (event.type === 'aws-spotprice-error') {
+    });
+
+    if (event.payload.NextToken) {
+      awsService.getSpotPrices(event.payload.NextToken);
+    }
+  });
+
+  eventService.getObservable().filter(function (event) {return event.type === 'aws-spotprice-error';}).subscribe(function (event) {
+    console.log('eventTriggered: ', event);
       console.log('is aws-spotprice-error event');
       $scope.spotErrors.error = event.payload;
-    }
   });
 
 	$scope.updateTypes = function() {

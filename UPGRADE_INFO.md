@@ -245,6 +245,9 @@ export type EventType =
     }
   });
 ```
+- Filtering the events from the observable. 
+  - Imported ```import 'rxjs/add/operator/filter';``` in the EventService
+  - filter between _getObservable()_ and _subscribe_
 
 
 ## Logging

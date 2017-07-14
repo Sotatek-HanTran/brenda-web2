@@ -182,14 +182,16 @@ angular.module('awsSetup')
 				success: 0,
 				failed: 0,
 				inFlight: 0
-	};
+	}
 
-  eventService.getObservable().subscribe(function (event) {
+  eventService.getObservable().filter(function (event) {return event.type === 'aws-sqs-send-update';}).subscribe(function (event) {
     console.log('eventTriggered: ', event);
-    if (event.type === 'aws-sqs-send-update') {
       console.log('is aws-sqs-send-update event');
       $scope.sendStatus = event.payload;
-    } else if (event.type === 'aws-sqs-success') {
+  });
+
+  eventService.getObservable().filter(function (event) {return event.type === 'aws-sqs-success';}).subscribe(function (event) {
+    console.log('eventTriggered: ', event);
       console.log('is aws-sqs-success event');
       $scope.queues = [];
 
@@ -199,7 +201,6 @@ angular.module('awsSetup')
 
       $scope.queue.workQueue = localStorageService.get('workQueue');
       $scope.$digest();
-    }
   });
 
 }]);
