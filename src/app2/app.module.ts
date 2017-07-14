@@ -8,7 +8,7 @@ import {LandingPageComponent} from './landingPage/landing-page.component';
 import {localStorageProvider} from './ajs-upgraded-providers';
 import {AwsService} from './services/aws.service';
 import {EventService} from './messaging/event.service';
-import {LOG_LOGGER_PROVIDERS} from 'angular2-logger/core';
+import {Logger, Options, Level} from 'angular2-logger/core';
 
 declare let angular: any;
 
@@ -46,7 +46,8 @@ angular.module('brendaWeb')
     UpgradeModule
   ],
   providers: [
-    LOG_LOGGER_PROVIDERS,
+    { provide: Options, useValue: { store: false, level: Level.DEBUG } },
+    Logger,
     AwsService,
     localStorageProvider,
     EventService

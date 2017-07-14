@@ -19,6 +19,7 @@ after the static imports and before the ending _body_ tag.
 - fixed paths for old refences to files in the _/app_ folder because the new root is on the _/index.html_ level. 
 Because it runs in the Angular context.
 - moved _amiList.json_ and _instances.json_ from _app_ to _assets_ and fixed paths.
+- exclude ES5 code for Angular in _tsconfig.spec.json_ and _tsconfig.app.json_ 
 
 ### Adding the UpgradeModule
 - removing bootstrap from decorator in @NgModule
@@ -235,11 +236,11 @@ export type EventType =
 - Adding the _EventService_ to the providers.
 - After downgrading the _EventService_ can be injected to the old AngularJS modules. AngularJS example:
 ```typescript
-  eventService.getObservable().subscribe(function (observable) {
-    if (observable.event.type === 'aws-sqs-send-update') {  // checking the type
+  eventService.getObservable().subscribe(function (event) {
+    if (event.type === 'aws-sqs-send-update') {  // checking the type
       console.log('is aws-sqs-send-update event');
-      $scope.sendStatus = observable.event.payload;  // some old code
-    } else if (observable.event.type === 'aws-sqs-success') {  // checking the type
+      $scope.sendStatus = event.payload;  // some old code
+    } else if (event.type === 'aws-sqs-success') {  // checking the type
       // ... some old code
     }
   });
@@ -276,9 +277,16 @@ To log something, simply inject the Logger to the component or service and use i
     this.logger.info('something you want to log...');
 ```
 
-
 Futher documentation on the github page of the logging library.
 
+### Testing
+- https://medium.com/google-developer-experts/angular-2-testing-guide-a485b6cb1ef0
+- https://angular.io/guide/testing
+
+#### First Step
+Make the default _app.component.spec.ts_ test work.
+- run ```ng test```
+- Static LOGGER import made problems. Solution was to import _Logger_ from _angular2-logger_ and configure it in the 
 
 
 ## Links for aws-sdk in Angular-CLI
