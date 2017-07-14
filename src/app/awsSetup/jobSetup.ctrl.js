@@ -184,16 +184,16 @@ angular.module('awsSetup')
 				inFlight: 0
 	};
 
-  eventService.getObservable().subscribe(function (observable) {
-    console.log('eventTriggered: ', observable.event);
-    if (observable.event.type === 'aws-sqs-send-update') {
+  eventService.getObservable().subscribe(function (event) {
+    console.log('eventTriggered: ', event);
+    if (event.type === 'aws-sqs-send-update') {
       console.log('is aws-sqs-send-update event');
-      $scope.sendStatus = observable.event.payload;
-    } else if (observable.event.type === 'aws-sqs-success') {
+      $scope.sendStatus = event.payload;
+    } else if (event.type === 'aws-sqs-success') {
       console.log('is aws-sqs-success event');
       $scope.queues = [];
 
-      observable.event.payload.QueueUrls.forEach(function (entry) {
+      event.payload.QueueUrls.forEach(function (entry) {
         $scope.queues.push(entry);
       });
 

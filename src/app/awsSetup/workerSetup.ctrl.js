@@ -52,16 +52,12 @@ angular.module('awsSetup')
 
   $scope.spotErrors = {};
 
-
-
-
-
-  eventService.getObservable().subscribe(function (observable) {
-    console.log('eventTriggered: ', observable.event);
-    if (observable.event.type === 'aws-spotprice-update') {
+  eventService.getObservable().filter(function (event) {return event.type === 'aws-spotprice-update';}).subscribe(function (event) {
+    console.log('eventTriggered: ', event);
+    if (event.type === 'aws-spotprice-update') {
       console.log('is aws-spotprice-update event');
 
-      observable.event.payload.SpotPriceHistory.forEach(function (price) {
+      event.payload.SpotPriceHistory.forEach(function (price) {
         var instance = $scope.instances.find(function (inst) {
           return inst.name === price.InstanceType;
         });
@@ -75,16 +71,14 @@ angular.module('awsSetup')
         }
       });
 
-      if (observable.event.payload.NextToken) {
-        awsService.getSpotPrices(observable.event.payload.NextToken);
+      if (event.payload.NextToken) {
+        awsService.getSpotPrices(event.payload.NextToken);
       }
-    } else if (observable.event.type === 'aws-spotprice-error') {
+    } else if (event.type === 'aws-spotprice-error') {
       console.log('is aws-spotprice-error event');
-      $scope.spotErrors.error = observable.event.payload;
+      $scope.spotErrors.error = event.payload;
     }
   });
-
-
 
 	$scope.updateTypes = function() {
 		$q.all([$http.get('assets/instances.json'), awsService.getAvailabilityZones()])
